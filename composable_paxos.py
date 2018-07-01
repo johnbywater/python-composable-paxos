@@ -213,7 +213,7 @@ class Proposer (MessageHandler):
 
             self.promises_received.add( msg.from_uid )
 
-            if msg.last_accepted_id > self.highest_accepted_id:
+            if self.highest_accepted_id is None or msg.last_accepted_id > self.highest_accepted_id:
                 self.highest_accepted_id = msg.last_accepted_id
                 if msg.last_accepted_value is not None:
                     self.proposed_value = msg.last_accepted_value
@@ -256,7 +256,7 @@ class Acceptor (MessageHandler):
         Returns either a Promise or a Nack in response. The Acceptor's state must be persisted to disk
         prior to transmitting the Promise message.
         '''
-        if msg.proposal_id >= self.promised_id:
+        if self.promised_id is None or msg.proposal_id >= self.promised_id:
             self.promised_id = msg.proposal_id
             return Promise(self.network_uid, msg.from_uid, self.promised_id, self.accepted_id, self.accepted_value)
         else:
@@ -268,7 +268,7 @@ class Acceptor (MessageHandler):
         Returns either an Accepted or Nack message in response. The Acceptor's state must be persisted
         to disk prior to transmitting the Accepted message.
         '''
-        if msg.proposal_id >= self.promised_id:
+        if self.promised_id is None or msg.proposal_id >= self.promised_id:
             self.promised_id     = msg.proposal_id
             self.accepted_id     = msg.proposal_id
             self.accepted_value  = msg.proposal_value
@@ -317,7 +317,7 @@ class Learner (MessageHandler):
             
         last_pn = self.acceptors.get(msg.from_uid)
 
-        if msg.proposal_id <= last_pn:
+        if last_pn is not None and msg.proposal_id <= last_pn:
             return # Old message
 
         self.acceptors[ msg.from_uid ] = msg.proposal_id

@@ -323,16 +323,16 @@ class Learner (MessageHandler):
         self.acceptors[ msg.from_uid ] = msg.proposal_id
         
         if last_pn is not None:
-            ps = self.proposals[ last_pn ]
+            ps = self.proposals[ str(last_pn) ]
             ps.retain_count -= 1
             ps.acceptors.remove(msg.from_uid)
             if ps.retain_count == 0:
-                del self.proposals[ last_pn ]
+                del self.proposals[ str(last_pn) ]
 
-        if not msg.proposal_id in self.proposals:
-            self.proposals[ msg.proposal_id ] = Learner.ProposalStatus(msg.proposal_value)
+        if not str(msg.proposal_id) in self.proposals:
+            self.proposals[ str(msg.proposal_id) ] = Learner.ProposalStatus(msg.proposal_value)
 
-        ps = self.proposals[ msg.proposal_id ]
+        ps = self.proposals[ str(msg.proposal_id) ]
 
         assert msg.proposal_value == ps.value, 'Value mismatch for single proposal!'
 
